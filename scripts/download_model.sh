@@ -23,4 +23,4 @@ if [ -n "$CACHE_DIR" ]; then
     python scripts/download_models.py "$MODEL_NAME" --cache_dir "$CACHE_DIR"
 else
     python scripts/download_models.py "$MODEL_NAME"
-fi 
+fi

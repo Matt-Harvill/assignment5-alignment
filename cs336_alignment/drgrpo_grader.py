@@ -23,7 +23,6 @@ import re
 import signal
 from itertools import islice, zip_longest
 from math import isclose
-from typing import Optional
 
 import sympy
 from latex2sympy2_extended import latex2sympy
@@ -36,7 +35,7 @@ from sympy.parsing.sympy_parser import parse_expr
 
 
 # Dan Hendrycks' code
-def mathd_normalize_answer(answer: Optional[str]) -> Optional[str]:
+def mathd_normalize_answer(answer: str | None) -> str | None:
     if answer is None:
         return None
     answer = answer.strip()
@@ -278,11 +277,7 @@ def _strip_string(string):
     # replace tfrac and dfrac with frac
     string = string.replace("tfrac", "frac")
     string = string.replace("dfrac", "frac")
-    string = (
-        string.replace("\\neq", "\\ne")
-        .replace("\\leq", "\\le")
-        .replace("\\geq", "\\ge")
-    )
+    string = string.replace("\\neq", "\\ne").replace("\\leq", "\\le").replace("\\geq", "\\ge")
     # print(string)
 
     # remove \left and \right
@@ -660,9 +655,7 @@ def is_value_equal(given_answer: str, ground_truth: str) -> bool:
 
     str_equal = ground_truth_normalized_mathd == given_answer_normalized_mathd
     try:
-        number_equal = float(ground_truth_normalized_mathd) == float(
-            given_answer_normalized_mathd
-        )
+        number_equal = float(ground_truth_normalized_mathd) == float(given_answer_normalized_mathd)
         return str_equal or number_equal
     except Exception:
         return str_equal
@@ -679,10 +672,7 @@ def _sympy_parse(expr: str):
     py_expr = expr.replace("^", "**")
     return sympy_parser.parse_expr(
         py_expr,
-        transformations=(
-            sympy_parser.standard_transformations
-            + (sympy_parser.implicit_multiplication_application,)
-        ),
+        transformations=(sympy_parser.standard_transformations + (sympy_parser.implicit_multiplication_application,)),
     )
 
 
@@ -950,8 +940,7 @@ def grade_answer_sympy(given_answer: str, ground_truth: str) -> bool:
     given_elems = split_tuple(given_normalized)
 
     if len(ground_truth_elems) > 1 and (
-        ground_truth_normalized[0] != given_normalized[0]
-        or ground_truth_normalized[-1] != given_normalized[-1]
+        ground_truth_normalized[0] != given_normalized[0] or ground_truth_normalized[-1] != given_normalized[-1]
     ):
         is_correct = False
     elif len(ground_truth_elems) != len(given_elems):
@@ -992,9 +981,7 @@ def extract_answer(passage: str) -> str:
 def grade(model_answer: str, gt_answer: str, fast: bool = True):
     if "\\boxed" in gt_answer:
         gt_answer = extract_answer(gt_answer)
-    correct = grade_answer_mathd(model_answer, gt_answer) or grade_answer_sympy(
-        model_answer, gt_answer
-    )
+    correct = grade_answer_mathd(model_answer, gt_answer) or grade_answer_sympy(model_answer, gt_answer)
     if not fast:
         # This mode further uses math_verify to recall originally false positives.
         # Will be a bit slower, and sensitive to bad inputs.
@@ -1012,11 +999,7 @@ def r1_zero_reward_fn(response, ground_truth, fast=True):
         if "\\boxed" in model_answer:
             model_answer = extract_answer(model_answer)
             if model_answer is None:
-                return {
-                    "format_reward": 1.0,
-                    "answer_reward": 0.0,
-                    "reward": 0.0
-                }
+                return {"format_reward": 1.0, "answer_reward": 0.0, "reward": 0.0}
         if isinstance(ground_truth, float) or isinstance(ground_truth, int):
             ground_truth = str(ground_truth)
         if isinstance(ground_truth, str):
@@ -1026,36 +1009,20 @@ def r1_zero_reward_fn(response, ground_truth, fast=True):
             for gt in ground_truth:
                 is_correct |= grade(model_answer, gt, fast)
         if is_correct:
-            return {
-                "format_reward": 1.0,
-                "answer_reward": 1.0,
-                "reward": 1.0
-            }
+            return {"format_reward": 1.0, "answer_reward": 1.0, "reward": 1.0}
         else:
             # Formatted but wrong answer; no format reward to avoid hacking.
-            return {
-                "format_reward": 1.0,
-                "answer_reward": 0.0,
-                "reward": 0.0
-            }
+            return {"format_reward": 1.0, "answer_reward": 0.0, "reward": 0.0}
     else:
         # Unformatted.
-        return {
-            "format_reward": 0.0,
-            "answer_reward": 0.0,
-            "reward": 0.0
-        }
+        return {"format_reward": 0.0, "answer_reward": 0.0, "reward": 0.0}
 
 
 def question_only_reward_fn(response, ground_truth, fast=True):
     model_answer = extract_answer(response)
     if model_answer is None:
         # Cannot even parse anything.
-        return {
-            "format_reward": 0.0,
-            "answer_reward": 0.0,
-            "reward": 0.0
-        }
+        return {"format_reward": 0.0, "answer_reward": 0.0, "reward": 0.0}
     if isinstance(ground_truth, float) or isinstance(ground_truth, int):
         ground_truth = str(ground_truth)
     if isinstance(ground_truth, str):
@@ -1066,15 +1033,7 @@ def question_only_reward_fn(response, ground_truth, fast=True):
             is_correct |= grade(model_answer, gt, fast)
     if is_correct:
         # Correctness reward.
-        return {
-            "format_reward": 1.0,
-            "answer_reward": 1.0,
-            "reward": 1.0
-        }
+        return {"format_reward": 1.0, "answer_reward": 1.0, "reward": 1.0}
     else:
         # Formatted but wrong answer; no format reward to avoid hacking.
-        return {
-            "format_reward": 1.0,
-            "answer_reward": 0.0,
-            "reward": 0.0
-        }
+        return {"format_reward": 1.0, "answer_reward": 0.0, "reward": 0.0}

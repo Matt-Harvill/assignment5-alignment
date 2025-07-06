@@ -79,7 +79,7 @@ All changes we make to the assignment code or PDF will be documented in this fil
 
 ### Added
 
-- handout: explicitly set CUDA_HOME in FlashAttention-2 installation instructions. 
+- handout: explicitly set CUDA_HOME in FlashAttention-2 installation instructions.
 - code: explicitly set CUDA_HOME in FlashAttention-2 installation instructions.
 
 ### Changed

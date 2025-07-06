@@ -4,7 +4,7 @@
 
 ### Problem (math_baseline): 4 points
 1. ✅
-2. 
+2.
 === Evaluation Metrics ===
 Total examples: 1319
 Category 1 (correct format and answer): 233 (17.66%)

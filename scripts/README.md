@@ -59,4 +59,4 @@ python scripts/download_models.py meta-llama/Llama-2-7b-hf --token hf_your_token
 - Models are downloaded to `~/.cache/huggingface/hub` by default
 - The script automatically handles authentication using your HF_TOKEN
 - Large models may take significant time and disk space to download
-- Make sure you have sufficient disk space for the models you want to download 
+- Make sure you have sufficient disk space for the models you want to download

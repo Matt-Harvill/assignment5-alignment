@@ -8,6 +8,7 @@ from .adapters import (
     run_sft_microbatch_train_step as sft_microbatch_train_step,
 )
 
+
 def test_tokenize_prompt_and_output(numpy_snapshot, prompt_strs, output_strs, tokenizer):
     output = tokenize_prompt_and_output(
         prompt_strs=prompt_strs,
@@ -15,6 +16,7 @@ def test_tokenize_prompt_and_output(numpy_snapshot, prompt_strs, output_strs, to
         tokenizer=tokenizer,
     )
     numpy_snapshot.assert_match(output)
+
 
 def test_compute_entropy(numpy_snapshot, logits):
     output = compute_entropy(logits)
@@ -34,6 +36,7 @@ def test_get_response_log_probs(
         return_token_entropy=True,
     )
     numpy_snapshot.assert_match(output)
+
 
 def test_masked_normalize_dim0(numpy_snapshot, tensor, mask, normalize_constant):
     output = masked_normalize(
@@ -73,6 +76,7 @@ def test_masked_normalize_dimNone(numpy_snapshot, tensor, mask, normalize_consta
     )
     numpy_snapshot.assert_match(output)
 
+
 def test_sft_microbatch_train_step(
     numpy_snapshot,
     policy_log_probs,
@@ -88,6 +92,7 @@ def test_sft_microbatch_train_step(
     )
     output = {"loss": loss, "policy_log_probs_grad": policy_log_probs.grad}
     numpy_snapshot.assert_match(output)
+
 
 def test_sft_microbatch_train_step_normalize(
     numpy_snapshot,
@@ -105,6 +110,7 @@ def test_sft_microbatch_train_step_normalize(
     )
     output = {"loss": loss, "policy_log_probs_grad": policy_log_probs.grad}
     numpy_snapshot.assert_match(output)
+
 
 def test_sft_microbatch_train_step_10_steps(
     numpy_snapshot,

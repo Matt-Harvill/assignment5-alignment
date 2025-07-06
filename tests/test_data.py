@@ -42,13 +42,9 @@ def test_packed_sft_dataset():
     )
     all_unshuffled_examples = []
     all_shuffled_examples = []
-    for example, shuffled_example in zip(
-        packed_sft_dataset, shuffled_packed_sft_dataset
-    ):
+    for example, shuffled_example in zip(packed_sft_dataset, shuffled_packed_sft_dataset):
         all_unshuffled_examples.append({k: v.tolist() for k, v in example.items()})
-        all_shuffled_examples.append(
-            {k: v.tolist() for k, v in shuffled_example.items()}
-        )
+        all_shuffled_examples.append({k: v.tolist() for k, v in shuffled_example.items()})
     assert all_unshuffled_examples != all_shuffled_examples
 
 
@@ -63,9 +59,7 @@ def test_iterate_batches():
         seq_length=seq_length,
         shuffle=True,
     )
-    train_dataloader = run_iterate_batches(
-        dataset=packed_sft_dataset, batch_size=batch_size, shuffle=True
-    )
+    train_dataloader = run_iterate_batches(dataset=packed_sft_dataset, batch_size=batch_size, shuffle=True)
     assert len(train_dataloader) == math.ceil(75 / batch_size)
     for batch_idx, batch in enumerate(train_dataloader):
         # Make sure each of input_ids and labels is a (batch_size, seq_length) tensor, except
@@ -74,10 +68,5 @@ def test_iterate_batches():
             assert batch["input_ids"].shape == (batch_size, seq_length)
             assert batch["labels"].shape == (batch_size, seq_length)
 
-        assert (
-            batch["input_ids"].dtype == torch.long
-            or batch["input_ids"].dtype == torch.int64
-        )
-        assert (
-            batch["labels"].dtype == torch.long or batch["labels"].dtype == torch.int64
-        )
+        assert batch["input_ids"].dtype == torch.long or batch["input_ids"].dtype == torch.int64
+        assert batch["labels"].dtype == torch.long or batch["labels"].dtype == torch.int64

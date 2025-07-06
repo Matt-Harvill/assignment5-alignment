@@ -38,23 +38,29 @@ To test your code, implement [adapters.run_compute_group_normalized_rewards]. Th
 run the test with uv run pytest -k test_compute_group_normalized_rewards and make
 sure your implementation passes it.
 """
-from typing import Callable
+
+from collections.abc import Callable
 import torch
+
 
 def compute_group_normalized_rewards(
     reward_fn: Callable[[str, str], dict[str, float]],
-    rollout_responses: list [str], # length is rollout_batch_size = n_prompts_per_rollout_batch * group_size
-    repeated_ground_truths: list[str], # length is also rollout_batch_size
+    rollout_responses: list[str],  # length is rollout_batch_size = n_prompts_per_rollout_batch * group_size
+    repeated_ground_truths: list[str],  # length is also rollout_batch_size
     group_size: int,
     advantage_eps: float,
     normalize_by_std: bool,
-) -> tuple[torch.Tensor, torch.Tensor, dict[str, float]]: # advantages (rollout_batch_size,), raw_rewards (same), metadata
+) -> tuple[
+    torch.Tensor, torch.Tensor, dict[str, float]
+]:  # advantages (rollout_batch_size,), raw_rewards (same), metadata
     """
     Compute rewards for each group of rollout responses, normalized by the group size.
     """
 
-    assert len(rollout_responses) == len(repeated_ground_truths), f"Mismatch: rollout_responses length {len(rollout_responses)} != repeated_ground_truths length {len(repeated_ground_truths)}"
-    
+    assert (
+        len(rollout_responses) == len(repeated_ground_truths)
+    ), f"Mismatch: rollout_responses length {len(rollout_responses)} != repeated_ground_truths length {len(repeated_ground_truths)}"
+
     rollout_batch_size = len(rollout_responses)
     assert rollout_batch_size % group_size == 0, "rollout_batch_size must be divisible by group_size"
 
@@ -62,12 +68,13 @@ def compute_group_normalized_rewards(
 
     advantages: torch.Tensor = torch.empty(size=(rollout_batch_size,))
     raw_rewards: torch.Tensor = torch.empty(size=(rollout_batch_size,))
-    
+
     # Compute rewards and advantages
     for group_index in range(n_prompts_pre_rollout_batch):
-
         # Create new tensor for storing group rewards
-        group_rewards: torch.Tensor = torch.zeros(group_size,)
+        group_rewards: torch.Tensor = torch.zeros(
+            group_size,
+        )
 
         for sample_index in range(group_size):
             index = (group_index * group_size) + sample_index
@@ -78,9 +85,9 @@ def compute_group_normalized_rewards(
 
         # Calculate advantages based on group stats
         group_std, group_mean = torch.std_mean(group_rewards)
-        group_advantages = (group_rewards - group_mean)
+        group_advantages = group_rewards - group_mean
         if normalize_by_std:
-            group_advantages /= (group_std + advantage_eps)
+            group_advantages /= group_std + advantage_eps
 
         # Update return variables
         raw_rewards[group_index * group_size : (group_index + 1) * group_size] = group_rewards
@@ -90,7 +97,3 @@ def compute_group_normalized_rewards(
     metadata: dict[str, float] = {}
 
     return advantages, raw_rewards, metadata
-
-    
-
-
